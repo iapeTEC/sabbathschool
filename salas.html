@@ -1,8 +1,613 @@
-<html>
-  <head>
-    
-  </head>
-  <body>
-    
-  </body>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="ea_nlx_icon.ico" type="image/x-icon">
+    <title>Salas dos Alunos</title>
+    <style>
+        :root {
+            --bg: #101828;
+            --bg-soft: #172033;
+            --panel: rgba(255,255,255,0.10);
+            --panel-border: rgba(255,255,255,0.18);
+            --text: #f8fafc;
+            --muted: #dbe4ff;
+            --shadow: 0 18px 45px rgba(0,0,0,0.30);
+            --radius: 24px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            color: var(--text);
+            min-height: 100vh;
+            background:
+                radial-gradient(circle at top left, rgba(255, 214, 102, 0.18), transparent 24%),
+                radial-gradient(circle at top right, rgba(125, 211, 252, 0.18), transparent 26%),
+                radial-gradient(circle at bottom left, rgba(196, 181, 253, 0.18), transparent 24%),
+                linear-gradient(140deg, #0f172a 0%, #1e293b 45%, #0b1220 100%);
+            overflow-x: hidden;
+        }
+
+        body::before,
+        body::after {
+            content: "";
+            position: fixed;
+            inset: auto;
+            width: 280px;
+            height: 280px;
+            border-radius: 50%;
+            pointer-events: none;
+            filter: blur(70px);
+            opacity: 0.22;
+            z-index: 0;
+        }
+
+        body::before {
+            top: -60px;
+            left: -70px;
+            background: #60a5fa;
+        }
+
+        body::after {
+            right: -70px;
+            bottom: -60px;
+            background: #f472b6;
+        }
+
+        .main-container {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            gap: 22px;
+            min-height: 100vh;
+            padding: 24px;
+        }
+
+        .content {
+            flex: 1 1 auto;
+            min-width: 0;
+        }
+
+        .hero {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 18px;
+            margin-bottom: 22px;
+            padding: 22px 26px;
+            border-radius: 28px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.14), rgba(255,255,255,0.08));
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255,255,255,0.18);
+            box-shadow: var(--shadow);
+        }
+
+        .hero-text {
+            min-width: 0;
+        }
+
+        .hero h1 {
+            font-size: clamp(2rem, 3vw, 3.3rem);
+            line-height: 1.05;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .hero p {
+            font-size: clamp(1rem, 1.5vw, 1.35rem);
+            color: var(--muted);
+            line-height: 1.4;
+            max-width: 900px;
+        }
+
+        .hero-badge {
+            flex: 0 0 auto;
+            padding: 12px 18px;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.13);
+            border: 1px solid rgba(255,255,255,0.18);
+            font-size: 0.95rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            text-align: center;
+            white-space: nowrap;
+        }
+
+        .classes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+            gap: 18px;
+        }
+
+        .classe {
+            position: relative;
+            overflow: hidden;
+            min-height: 250px;
+            border-radius: var(--radius);
+            padding: 22px;
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            border: 1px solid rgba(255,255,255,0.30);
+        }
+
+        .classe::before {
+            content: "";
+            position: absolute;
+            top: -38px;
+            right: -36px;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.16);
+        }
+
+        .classe::after {
+            content: "";
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            height: 8px;
+            background: rgba(255,255,255,0.30);
+        }
+
+        .classe-top,
+        .classe-bottom {
+            position: relative;
+            z-index: 1;
+        }
+
+        .classe-categoria {
+            display: inline-block;
+            margin-bottom: 10px;
+            padding: 6px 12px;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.24);
+            font-size: 0.82rem;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+
+        .classe-nome {
+            font-size: clamp(1.55rem, 2.3vw, 2rem);
+            line-height: 1.1;
+            font-weight: 800;
+            letter-spacing: 0.02em;
+            margin-bottom: 14px;
+        }
+
+        .linha {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-top: 10px;
+        }
+
+        .label {
+            font-size: 0.84rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            opacity: 0.82;
+        }
+
+        .valor {
+            font-size: clamp(1.1rem, 1.5vw, 1.45rem);
+            font-weight: 700;
+            line-height: 1.25;
+            word-break: break-word;
+        }
+
+        .aviso {
+            margin-top: 14px;
+            display: inline-block;
+            padding: 8px 12px;
+            border-radius: 12px;
+            background: rgba(0,0,0,0.16);
+            border: 1px solid rgba(255,255,255,0.28);
+            font-size: 0.95rem;
+            font-weight: 800;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        .theme-qatar {
+            background: linear-gradient(160deg, #bfdbfe 0%, #93c5fd 52%, #60a5fa 100%);
+            color: #0f172a;
+        }
+
+        .theme-bangladesh {
+            background: linear-gradient(160deg, #fecdd3 0%, #fda4af 52%, #fb7185 100%);
+            color: #3f0d17;
+        }
+
+        .theme-egito {
+            background: linear-gradient(160deg, #fde68a 0%, #fdba74 52%, #fb923c 100%);
+            color: #431407;
+        }
+
+        .theme-india {
+            background: linear-gradient(160deg, #bbf7d0 0%, #86efac 50%, #4ade80 100%);
+            color: #052e16;
+        }
+
+        .theme-ira {
+            background: linear-gradient(160deg, #fecaca 0%, #fda4af 52%, #fb7185 100%);
+            color: #3f0d17;
+        }
+
+        .theme-iraque {
+            background: linear-gradient(160deg, #d9f99d 0%, #bef264 50%, #84cc16 100%);
+            color: #1a2e05;
+        }
+
+        .theme-amigos {
+            background: linear-gradient(160deg, #ddd6fe 0%, #c4b5fd 52%, #a78bfa 100%);
+            color: #2e1065;
+        }
+
+        .theme-libano {
+            background: linear-gradient(160deg, #fde68a 0%, #f9a8d4 52%, #c4b5fd 100%);
+            color: #3b0764;
+        }
+
+        .theme-jordania {
+            background: linear-gradient(160deg, #bfdbfe 0%, #a5f3fc 52%, #67e8f9 100%);
+            color: #083344;
+        }
+
+        .theme-israel {
+            background: linear-gradient(160deg, #fef3c7 0%, #fde68a 48%, #fbbf24 100%);
+            color: #422006;
+        }
+
+        .theme-benin {
+            background: linear-gradient(160deg, #fed7aa 0%, #fdba74 48%, #fb923c 100%);
+            color: #431407;
+        }
+
+        .qr-panel {
+            flex: 0 0 310px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 18px;
+            padding: 26px;
+            border-radius: 28px;
+            background: linear-gradient(180deg, rgba(255,255,255,0.14), rgba(255,255,255,0.08));
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255,255,255,0.18);
+            box-shadow: var(--shadow);
+            text-align: center;
+        }
+
+        .qr-panel h2 {
+            font-size: 1.55rem;
+            line-height: 1.2;
+        }
+
+        .qr-panel p {
+            color: var(--muted);
+            font-size: 1rem;
+            line-height: 1.45;
+        }
+
+        .qr-box {
+            background: #ffffff;
+            border-radius: 24px;
+            padding: 14px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.20);
+        }
+
+        .qr-panel img {
+            display: block;
+            width: 100%;
+            max-width: 250px;
+            height: auto;
+            border-radius: 16px;
+        }
+
+        @media (max-width: 1280px) {
+            .main-container {
+                gap: 18px;
+                padding: 18px;
+            }
+
+            .qr-panel {
+                flex-basis: 270px;
+                padding: 20px;
+            }
+        }
+
+        @media (max-width: 980px) {
+            .main-container {
+                flex-direction: column;
+            }
+
+            .qr-panel {
+                flex: none;
+                width: 100%;
+                max-width: none;
+                order: -1;
+            }
+
+            .classes-grid {
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                padding: 14px;
+            }
+
+            .hero {
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 18px;
+                border-radius: 22px;
+            }
+
+            .hero h1 {
+                font-size: 1.8rem;
+            }
+
+            .hero p {
+                font-size: 1rem;
+            }
+
+            .hero-badge {
+                font-size: 0.82rem;
+                padding: 10px 14px;
+            }
+
+            .classes-grid {
+                grid-template-columns: 1fr;
+                gap: 14px;
+            }
+
+            .classe {
+                min-height: auto;
+                padding: 18px;
+                border-radius: 20px;
+            }
+
+            .classe-nome {
+                font-size: 1.5rem;
+            }
+
+            .valor {
+                font-size: 1.06rem;
+            }
+
+            .qr-panel {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <div class="content">
+            <header class="hero">
+                <div class="hero-text">
+                    <h1>Salas dos Alunos</h1>
+                    <p>Consulte rapidamente a classe, a sala e os professores. Layout otimizado para telão no auditório e leitura confortável no celular.</p>
+                </div>
+                <div class="hero-badge">Mapa das classes</div>
+            </header>
+
+            <main class="classes-grid">
+                <section class="classe theme-qatar">
+                    <div class="classe-top">
+                        <div class="classe-categoria">Adolescentes</div>
+                        <div class="classe-nome">Qatar</div>
+                    </div>
+                    <div class="classe-bottom">
+                        <div class="linha">
+                            <div class="label">Sala</div>
+                            <div class="valor">1º Ano B</div>
+                        </div>
+                        <div class="linha">
+                            <div class="label">Professores</div>
+                            <div class="valor">Marambaia / Jessie / Stephanie</div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="classe theme-bangladesh">
+                    <div class="classe-top">
+                        <div class="classe-categoria">Adolescentes</div>
+                        <div class="classe-nome">Bangladesh</div>
+                    </div>
+                    <div class="classe-bottom">
+                        <div class="linha">
+                            <div class="label">Sala</div>
+                            <div class="valor">1º Ano A</div>
+                        </div>
+                        <div class="linha">
+                            <div class="label">Professores</div>
+                            <div class="valor">Agno / Samuel</div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="classe theme-egito">
+                    <div class="classe-top">
+                        <div class="classe-categoria">Jovens e Adolescentes</div>
+                        <div class="classe-nome">Egito</div>
+                    </div>
+                    <div class="classe-bottom">
+                        <div class="linha">
+                            <div class="label">Sala</div>
+                            <div class="valor">3º Ano</div>
+                        </div>
+                        <div class="linha">
+                            <div class="label">Professores</div>
+                            <div class="valor">Euler / Soraia / Anderson</div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="classe theme-india">
+                    <div class="classe-top">
+                        <div class="classe-categoria">Adultos</div>
+                        <div class="classe-nome">Índia</div>
+                    </div>
+                    <div class="classe-bottom">
+                        <div class="linha">
+                            <div class="label">Sala</div>
+                            <div class="valor">2º Ano B</div>
+                        </div>
+                        <div class="linha">
+                            <div class="label">Professores</div>
+                            <div class="valor">Denys / Malta / Breno</div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="classe theme-ira">
+                    <div class="classe-top">
+                        <div class="classe-categoria">Senior</div>
+                        <div class="classe-nome">Irã</div>
+                    </div>
+                    <div class="classe-bottom">
+                        <div class="linha">
+                            <div class="label">Sala</div>
+                            <div class="valor">Auditório Central</div>
+                        </div>
+                        <div class="linha">
+                            <div class="label">Professores</div>
+                            <div class="valor">Fernando</div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="classe theme-iraque">
+                    <div class="classe-top">
+                        <div class="classe-categoria">Senior</div>
+                        <div class="classe-nome">Iraque</div>
+                    </div>
+                    <div class="classe-bottom">
+                        <div class="linha">
+                            <div class="label">Sala</div>
+                            <div class="valor">Auditório Central</div>
+                        </div>
+                        <div class="linha">
+                            <div class="label">Professores</div>
+                            <div class="valor">Wilberto / Nice</div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="classe theme-amigos">
+                    <div class="classe-top">
+                        <div class="classe-categoria">Convidados</div>
+                        <div class="classe-nome">Amigos Convidados</div>
+                    </div>
+                    <div class="classe-bottom">
+                        <div class="linha">
+                            <div class="label">Sala</div>
+                            <div class="valor">2º Ano A</div>
+                        </div>
+                        <div class="linha">
+                            <div class="label">Professores</div>
+                            <div class="valor">Wesley / Margaret / Euler / Maiara / Janio / Stephane</div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="classe theme-libano">
+                    <div class="classe-top">
+                        <div class="classe-categoria">Espanhol</div>
+                        <div class="classe-nome">Líbano</div>
+                    </div>
+                    <div class="classe-bottom">
+                        <div class="linha">
+                            <div class="label">Sala</div>
+                            <div class="valor">8º Ano</div>
+                        </div>
+                        <div class="linha">
+                            <div class="label">Professora</div>
+                            <div class="valor">Zuemi</div>
+                        </div>
+                        <div class="aviso">Próximo sábado</div>
+                    </div>
+                </section>
+
+                <section class="classe theme-jordania">
+                    <div class="classe-top">
+                        <div class="classe-categoria">Libras</div>
+                        <div class="classe-nome">Jordânia</div>
+                    </div>
+                    <div class="classe-bottom">
+                        <div class="linha">
+                            <div class="label">Sala</div>
+                            <div class="valor">7º Ano</div>
+                        </div>
+                        <div class="linha">
+                            <div class="label">Professores</div>
+                            <div class="valor">Landa</div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="classe theme-israel">
+                    <div class="classe-top">
+                        <div class="classe-categoria">Inglês</div>
+                        <div class="classe-nome">Israel</div>
+                    </div>
+                    <div class="classe-bottom">
+                        <div class="linha">
+                            <div class="label">Sala</div>
+                            <div class="valor">6º Ano</div>
+                        </div>
+                        <div class="linha">
+                            <div class="label">Professores</div>
+                            <div class="valor">Nicolly / Bruno</div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="classe theme-benin">
+                    <div class="classe-top">
+                        <div class="classe-categoria">Bíblia Fácil</div>
+                        <div class="classe-nome">Benin</div>
+                    </div>
+                    <div class="classe-bottom">
+                        <div class="linha">
+                            <div class="label">Sala</div>
+                            <div class="valor">Sala do Pastor Denison</div>
+                        </div>
+                        <div class="linha">
+                            <div class="label">Professores</div>
+                            <div class="valor">Pr. Denison / Galvão / Pr. Rafael</div>
+                        </div>
+                    </div>
+                </section>
+            </main>
+        </div>
+
+        <aside class="qr-panel">
+            <h2>Abra no celular</h2>
+            <p>Escaneie o QR code para consultar este mapa de salas no smartphone.</p>
+            <div class="qr-box">
+                <img src="qr-code-placeholder.png" alt="QR Code para abrir o mapa de salas no celular">
+            </div>
+        </aside>
+    </div>
+</body>
 </html>
